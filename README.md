@@ -4,8 +4,9 @@
 
 [![License](https://img.shields.io/badge/license-MIT-green?)](LICENSE)
 [![Language](https://img.shields.io/badge/language-Lua-blue?)](https://www.lua.org/)
+![Codelines](https://tokei.rs/b1/github/Ace-B4/Raven-B4-For-Roblox?category=code&style=flat)
 
-Completely rewritten from scratch with the help of infinity yield and old Raven B4 source.
+Completely rewritten from scratch with the help of infinity yield and old raven B4 sources.
 
 <a href="https://discord.gg/4SpwqN979V"><img src="https://invidget.switchblade.xyz/4SpwqN979V" alt="https://discord.gg/4SpwqN979V"/></a><br>
 
@@ -29,7 +30,7 @@ Completely rewritten from scratch with the help of infinity yield and old Raven 
 
 ## 👏 Credits
 
-**Blowsy** - Original creator of Raven B4
+**Blowsy/Chef/Hevex** - Original creator of Raven B4
 
 **UI Blur** - [Roblox DevForum](https://devforum.roblox.com/t/ui-blur-automatic/2402850)
 
