@@ -1,6 +1,4 @@
 
-
-
 FlyCounter = buttons.FlyCounter
 FlyCounterInner = buttons.FlyCounterInner
 FlyCounterText = buttons.FlyCounterText
@@ -532,108 +530,7 @@ Autoclicker:CreateToggle({
 		AutoClickerBlocks = Callback
 	end
 })
-local oldCalculateAim
-local noveloproj = {
-	'fireball',
-	'telepearl'
-}
-local physicsUpdate = 1 / 60
-local BowPrediction = false
-local function Angle(v, g, d, h)
-	local v2 = v * v
-	local v4 = v2 * v2
-	local root = -math.sqrt(v4 - g * (g * d * d + 2 * h * v2))
-	return math.atan((v2 + root) / (g * d))
-end
-local function ConvertToDirection(start, target, v, g)
-	local horizontal = Vector3.new(target.X - start.X, 0, target.Z - start.Z)
-	local h = target.Y - start.Y
-	local d = horizontal.Magnitude
-	local a = Angle(v, g, d, h)
-	if a ~= a then
-		return g == 0 and (target - start).Unit * v
-	end
-	local vec = horizontal.Unit * v
-	local rotAxis = Vector3.new(-horizontal.Z, 0, horizontal.X)
-	return CFrame.fromAxisAngle(rotAxis, a) * vec
-end
-local function PlayerVelocityPOS(playerPosition, vel, bulletTime)
-	for i = 1, math.ceil(bulletTime / physicsUpdate) do
-		if BowPrediction then
-			playerPosition = playerPosition + Vector3.new(vel.X, -0.03, vel.Z)
-		else
-			playerPosition = playerPosition + Vector3.new(0, -0.03, 0)
-		end
-		return playerPosition
-	end
-end
 
-local BowRange = 5000
-BowAimbot = Combat:CreateToggle({
-	Name = "Bow Aimbot",
-	Callback = function(Callback)
-		if Callback then
-			oldCalculateAim = bedwars["ProjectileController"].calculateImportantLaunchValues
-			bedwars["ProjectileController"].calculateImportantLaunchValues = function(self, projmeta, worldmeta,
-                                                                                      shootpospart, ...)
-				local plr = GetClosestTeamCheck()
-				if plr and ((plr.Character.HumanoidRootPart.Position).magnitude < BowRange) then
-					local startPos = self:getLaunchPosition(shootpospart)
-					if not startPos then
-						return oldCalculateAim(self, projmeta, worldmeta, shootpospart, ...)
-					end
-					if (not Callback) and projmeta.projectile:find('arrow') == nil then
-						return oldCalculateAim(self, projmeta, worldmeta, shootpospart, ...)
-					end
-					local projmetatab = projmeta:getProjectileMeta()
-					local projectilePrediction = (worldmeta and projmetatab.predictionLifetimeSec or projmetatab.lifetimeSec or 3)
-					local projectileSpeed = (projmeta.projectile:find('arrow') and 240 or projmetatab.launchVelocity or 100)
-					local gravity = (projmetatab.gravitationalAcceleration or 196.2)
-					local projectileGravity = gravity * projmeta.gravityMultiplier
-					local offsetStartPos = startPos + projmeta.fromPositionOffset
-					local shootpos = PlayerVelocityPOS(plr.Character.HumanoidRootPart.Position,
-                        plr.Character.HumanoidRootPart.Velocity,
-                        (plr.Character.HumanoidRootPart.Position - offsetStartPos).Magnitude / projectileSpeed)
-					if table.find(noveloproj, projmeta.projectile) then
-						shootpos = plr.Character.HumanoidRootPart.Position
-					end
-					local newlook = CFrame.new(offsetStartPos, shootpos) *
-                        CFrame.new(Vector3.new(-bedwars["BowConstantsTable"].RelX, -bedwars["BowConstantsTable"].RelY, 0))
-					shootpos = newlook.p + (newlook.lookVector * (offsetStartPos - shootpos).magnitude)
-					local calculated = ConvertToDirection(offsetStartPos, shootpos, projectileSpeed, projectileGravity)
-					if calculated then
-						return {
-							initialVelocity = calculated,
-							positionFrom = offsetStartPos,
-							deltaT = projectilePrediction,
-							gravitationalAcceleration = projectileGravity,
-							drawDurationSeconds = 5
-						}
-					end
-				end
-				return oldCalculateAim(self, projmeta, worldmeta, shootpospart, ...)
-			end
-		else
-			bedwars["ProjectileController"].calculateImportantLaunchValues = oldCalculateAim
-		end
-	end
-})
-BowAimbot:CreateInfo("Aimbot but for Bow!")
-BowAimbot:CreateToggle({
-	Name = "Prediction",
-	Callback = function(Callback)
-		BowPrediction = Callback
-	end
-})
-BowAimbot:CreateSlider({
-	Name = "Range",
-	Min = 1000,
-	Default = 3000,
-	Max = 5000,
-	Callback = function(Callback)
-		BowRange = Callback
-	end
-})
  --maybe this will make it hit farther? (update: this is stupid, it does not work) -> anyone claiming reach gives even a slight advantage (yes even vape) is lying. -> it "gives" better hits because the localscript registeres the attack further away but when the server checks the attack, its not going to matter since modulescripts are server-sided and the server checks the distance of the attack. -> so this is just stupid
 --[[
 Reach = Combat:CreateToggle({
@@ -1126,6 +1023,7 @@ FlyButton.MouseButton1Click:Connect(function()
 		end)
 	end
 end)
+--[[
 local function ShootProjectile(Item, Projectile, NearestPOS)
 	local Args = {
 		[1] = Item,
@@ -1148,7 +1046,7 @@ local BowAuraRange = 500
 local FireBallProjectile = false
 local InfiniteRange = true
 BowAura = Blatant:CreateToggle({
-	Name = "BowAura",
+	Name = "BowAura", --broken
 	Callback = function(Callback)
 		EnabledBowAura = Callback
 		if EnabledBowAura then
@@ -1209,7 +1107,7 @@ BowAura:CreateToggle({
 	Callback = function(Callback)
 		FireBallProjectile = Callback
 	end
-})
+})]]
 HighJump = Blatant:CreateToggle({
 	Name = "HighJump",
 	Callback = function(Callback)
