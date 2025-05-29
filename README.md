@@ -4,7 +4,6 @@
 
 [![License](https://img.shields.io/badge/license-MIT-green?)](LICENSE)
 [![Language](https://img.shields.io/badge/language-Lua-blue?)](https://www.lua.org/)
-![Codelines](https://tokei.rs/b1/github/Ace-B4/Raven-B4-For-Roblox?category=code&style=flat)
 
 Completely rewritten from scratch with the help of infinity yield and old raven B4 sources.
 
