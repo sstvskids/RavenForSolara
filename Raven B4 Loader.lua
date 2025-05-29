@@ -11,7 +11,8 @@ RavenB4.__index = RavenB4
 function RavenB4.new()
     local self = setmetatable({}, RavenB4)
     self.ConfigPath = "RavenB4/Config"
-    self.FontPath = "RavenB4"
+    self.LoadFontPath = "RavenB4"
+    self.FontPath = "RavenB4/Font"
     self.GameName = ""
     self.ConfigName = "Default Config"
     self.SupportedGames = {
@@ -77,7 +78,7 @@ function RavenB4:WriteFontConfig(fontName, configFile)
             assetId = getcustomasset(self.FontPath .. "/" .. fontName .. ".otf")
         }}
     }
-    writefile(self.ConfigPath .. "/" .. configFile, HttpService:JSONEncode(config))
+    writefile(self.LoadFontPath .. "/" .. configFile, HttpService:JSONEncode(config))
 end
 
 function RavenB4:DetectGame()
@@ -92,7 +93,6 @@ function RavenB4:DetectGame()
     return false
 end
 
--- Load game-specific modules
 function RavenB4:LoadModules()
     local modulePath = shared.devtesting and "RavenB4s/ActualClient" or RAW_BASE_URL
     local success, result = pcall(function()
@@ -109,7 +109,6 @@ function RavenB4:LoadModules()
     return result
 end
 
--- Main initialization
 function RavenB4:Initialize()
     if shared.RavenB4Injected then
         error("RavenB4 is already injected!")
@@ -129,7 +128,6 @@ function RavenB4:Initialize()
     end
 end
 
--- Create and initialize RavenB4 instance
 local raven = RavenB4.new()
 local lib = raven:Initialize()
 
