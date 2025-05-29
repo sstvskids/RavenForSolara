@@ -1,3 +1,8 @@
+--discord.gg/boronide, code generated using luamin.js™
+
+
+
+
 FlyCounter = buttons.FlyCounter
 FlyCounterInner = buttons.FlyCounterInner
 FlyCounterText = buttons.FlyCounterText
@@ -7,6 +12,7 @@ LongjumpButton = buttons.LongjumpButton
 InfFlyButton = buttons.InfFlyButton
 FlyButton = buttons.FlyButton
 
+--module = shared.functions
 local bedwars = module.bedwars
 local SwordAnimations = module.SwordAnimations
 local SetCamera = module.SetCamera
@@ -630,7 +636,8 @@ BowAimbot:CreateSlider({
 		BowRange = Callback
 	end
 })
-
+ --maybe this will make it hit farther? (update: this is stupid, it does not work) -> anyone claiming reach gives even a slight advantage (yes even vape) is lying. -> it "gives" better hits because the localscript registeres the attack further away but when the server checks the attack, its not going to matter since modulescripts are server-sided and the server checks the distance of the attack. -> so this is just stupid
+--[[
 Reach = Combat:CreateToggle({
 	Name = "Reach",
 	Callback = function(Callback)
@@ -654,9 +661,9 @@ Reach:CreateSlider({
 	Default = 20,
 	Max = 20,
 	Callback = function(Callback)
-		ReachDistance = Callback --maybe this will make it hit farther?
+		ReachDistance = Callback
 	end
-})
+})]]
 local oldSprintFunction
 Combat:CreateToggle({
 	Name = "AutoSprint",
@@ -740,7 +747,6 @@ Blatant:CreateToggle({
 	end
 })
 
--- Existing getclosetestnearshop function
 local function getclosetestnearshop()
 	local newshopmag = 20
 	local shop = nil
@@ -770,7 +776,6 @@ local swords = {
 	[5] = 'emerald_sword'
 }
 
--- Adjust swords based on equipped kit
 if RavenEquippedKit ~= nil then
 	if RavenEquippedKit == 'dasher' then
 		swords = {
@@ -789,7 +794,6 @@ if RavenEquippedKit ~= nil then
 	end
 end
 
--- Helper function to check if item can be bought
 local function canBuyItem(itemName, shopId)
 	local item = getShopItem(itemName)
 	if not item then
@@ -799,7 +803,6 @@ local function canBuyItem(itemName, shopId)
 	return currency and item.price <= currency.amount, item, shopId
 end
 
--- AutoBuy toggle
 AutoBuy = Blatant:CreateToggle({
 	Name = "Auto Buy",
 	Callback = function(Callback)
@@ -815,7 +818,6 @@ AutoBuy = Blatant:CreateToggle({
 						continue
 					end
 
-					-- Buy swords if enabled
 					if EnabledSwordsBuy then
 						local currentSword = getSword()
 						local currentSwordName = currentSword and currentSword.tool.name
@@ -830,7 +832,6 @@ AutoBuy = Blatant:CreateToggle({
 						end
 					end
 
-					-- Buy armor if enabled
 					if EnabledArmorBuy then
 						local hasArmor = false
 						for i = 1, 4 do
@@ -915,7 +916,7 @@ function flyfunc()
 			inputBeganConnection = UIS.InputBegan:Connect(function(input, gameProcessed)
 				if gameProcessed then
 					return
-				end -- Ignore inputs processed by UI
+				end
 				if input.KeyCode == Enum.KeyCode.Space then
 					flyup = true
 				elseif input.KeyCode == Enum.KeyCode.LeftShift then
@@ -925,7 +926,7 @@ function flyfunc()
 			inputEndedConnection = UIS.InputEnded:Connect(function(input, gameProcessed)
 				if gameProcessed then
 					return
-				end -- Ignore inputs processed by UI
+				end
 				if input.KeyCode == Enum.KeyCode.Space then
 					flyup = false
 				elseif input.KeyCode == Enum.KeyCode.LeftShift then
@@ -986,7 +987,6 @@ function flyfunc()
 				flyup = false
 				flydown = false
 				flyactived = false
-				-- Cleanup input connections
 				if inputBeganConnection then
 					inputBeganConnection:Disconnect()
 				end
@@ -1005,7 +1005,7 @@ Fly = Blatant:CreateToggle({
 		if EnabledFly then
 			flyfunc()
 		else
-            -- Cleanup when Fly is disabled
+
 			flyactived = false
 			FlyCounter.Visible = false
 			if LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyVelocity") then
@@ -1084,7 +1084,7 @@ FlyButton.MouseButton1Click:Connect(function()
 			mouseInputBeganConnection = UIS.InputBegan:Connect(function(input, gameProcessed)
 				if gameProcessed then
 					return
-				end -- Ignore inputs processed by UI
+				end
 				if input.UserInputType == Enum.UserInputType.MouseButton1 and hoveringUpButton2 then
 					FlyUp = true
 				end
@@ -1095,7 +1095,7 @@ FlyButton.MouseButton1Click:Connect(function()
 			mouseInputEndedConnection = UIS.InputEnded:Connect(function(input, gameProcessed)
 				if gameProcessed then
 					return
-				end -- Ignore inputs processed by UI
+				end
 				if input.UserInputType == Enum.UserInputType.MouseButton1 then
 					FlyDown = false
 					FlyUp = false
@@ -1266,12 +1266,12 @@ LongJumpModule = Blatant:CreateToggle({
 	Name = "LongJump",
 	Callback = function(Callback)
 		LongJump = Callback
-		local JumpSpeed = 50 -- Horizontal speed
-		local JumpDuration = 2 -- Duration of the jump in seconds
-		local JumpTick = 0 -- When the jump should end
-		local Direction = Vector3.new(0, 0, 0) -- Direction of the jump
-		local connection -- For RenderStepped connection
-		local ImmobilizeUntil = 0 -- When immobilization should end
+		local JumpSpeed = 50
+		local JumpDuration = 2 
+		local JumpTick = 0 
+		local Direction = Vector3.new(0, 0, 0)
+		local connection 
+		local ImmobilizeUntil = 0 
 		if LongJump then
 			local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 			if not root then
@@ -1283,15 +1283,14 @@ LongJumpModule = Blatant:CreateToggle({
 				LongJumpItem = false
 				return
 			end
-			-- Determine direction (prefer MoveDirection, fallback to LookVector)
+
 			local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
 			local moveDir = humanoid and humanoid.MoveDirection or Vector3.new(0, 0, 0)
 			Direction = moveDir.Magnitude > 0 and moveDir.Unit or root.CFrame.LookVector
-			Direction = Vector3.new(Direction.X, 0, Direction.Z).Unit -- Strictly horizontal
+			Direction = Vector3.new(Direction.X, 0, Direction.Z).Unit
 			JumpTick = tick() + JumpDuration
-			ImmobilizeUntil = tick() + 0.5 -- Immobilize for 0.5 seconds
+			ImmobilizeUntil = tick() + 0.5
 
-			-- Handle TNT or Fireball
 			local HRootPos = root.Position
 			local Pos2 = HRootPos + Vector3.new(0, 2, 0)
 			if GetItemNear("tnt") then
@@ -1325,7 +1324,6 @@ LongJumpModule = Blatant:CreateToggle({
 				LongJumpModule:SetState(false)
 				return
 			end
-			-- Apply velocity boost and check for walls
 			connection = game:GetService("RunService").RenderStepped:Connect(function(dt)
 				if not LongJump or not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
 					if connection then
@@ -1335,12 +1333,10 @@ LongJumpModule = Blatant:CreateToggle({
 				end
 				root = LocalPlayer.Character.HumanoidRootPart
 				if tick() < ImmobilizeUntil then
-					-- Immobilize player by setting velocity to zero
 					root.Velocity = Vector3.new(0, 0, 0)
 				elseif JumpTick > tick() and LongJumpItem then
-					-- Raycast to check for walls
 					local rayOrigin = root.Position
-					local rayDirection = Direction * 5 -- Check 5 studs ahead
+					local rayDirection = Direction * 5
 					local raycastParams = RaycastParams.new()
 					raycastParams.FilterDescendantsInstances = {
 						LocalPlayer.Character
@@ -1348,15 +1344,12 @@ LongJumpModule = Blatant:CreateToggle({
 					raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 					local raycastResult = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
 					if raycastResult then
-						-- Wall detected, stop the jump
 						JumpTick = 0
 						root.Velocity = Vector3.new(0, 0, 0)
 					else
-						-- Apply strictly horizontal velocity
 						root.Velocity = Vector3.new(Direction.X * JumpSpeed, 15, Direction.Z * JumpSpeed)
 					end
 				else
-					-- Reset velocity when jump ends
 					root.Velocity = Vector3.new(0, 0, 0)
 					if connection then
 						connection:Disconnect()
@@ -1366,7 +1359,6 @@ LongJumpModule = Blatant:CreateToggle({
 				end
 			end)
 		else
-			-- Cleanup when toggled off
 			JumpTick = 0
 			if connection then
 				connection:Disconnect()
@@ -1390,7 +1382,6 @@ Nofall = Blatant:CreateToggle({
 		NoFallEnabled = Callback
 		if Callback then
 			if FallMode == "TimerTP" then
-                -- Local player and services
 				local lplr = LocalPlayer
 				local character = lplr.Character or lplr.CharacterAdded:Wait()
 				local root = character:WaitForChild("HumanoidRootPart", 5)
@@ -1400,24 +1391,20 @@ Nofall = Blatant:CreateToggle({
 					return
 				end
 
-                -- Safe velocity cap
 				local SAFE_FALL_VELOCITY = -77.5
 
-                -- Raycast parameters for ground check
 				local raycastParams = RaycastParams.new()
 				raycastParams.FilterDescendantsInstances = {
 					character
 				}
 				raycastParams.FilterType = Enum.RaycastFilterType.Exclude
 
-                -- Raycast parameters for block detection
 				local blockRaycast = RaycastParams.new()
 				blockRaycast.FilterDescendantsInstances = {
 					character
 				}
 				blockRaycast.FilterType = Enum.RaycastFilterType.Exclude
 
-                -- Connection for physics step
 				local steppedConnection
 				steppedConnection = RunService.PreSimulation:Connect(function(dt)
 					if not NoFallEnabled or FallMode ~= "TimerTP" then
@@ -1428,7 +1415,6 @@ Nofall = Blatant:CreateToggle({
 						return
 					end
 
-                    -- Check if airborne
 					local rayOrigin = root.Position
 					local rayDirection = Vector3.new(0, -1.5, 0)
 					local rayResult = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
@@ -1468,7 +1454,6 @@ Nofall = Blatant:CreateToggle({
 					end
 				end)
 
-                -- Handle respawn
 				local characterAddedConnection
 				characterAddedConnection = lplr.CharacterAdded:Connect(function(newCharacter)
 					if not NoFallEnabled or FallMode ~= "TimerTP" then
@@ -1485,12 +1470,10 @@ Nofall = Blatant:CreateToggle({
 					}
 				end)
 
-                -- Store connections for cleanup
 				Nofall.Connections = Nofall.Connections or {}
 				table.insert(Nofall.Connections, steppedConnection)
 				table.insert(Nofall.Connections, characterAddedConnection)
 			elseif FallMode == "FakeSend" then
-                -- Start FakeSend loop
 				task.spawn(function()
 					while NoFallEnabled and FallMode == "FakeSend" do
 						if IsAlive(LocalPlayer) then
@@ -1517,7 +1500,6 @@ Nofall = Blatant:CreateToggle({
 				end)
 			end
 		else
-            -- Cleanup when disabled
 			Nofall.Connections = Nofall.Connections or {}
 			for _, connection in ipairs(Nofall.Connections) do
 				pcall(function()
@@ -1563,14 +1545,12 @@ task.spawn(function()
 	end)
 end)
 
--- Speed-related locals
 local PotionBoostEnabled = false
-local NewSpeed = 23 -- Default from slider
+local NewSpeed = 23 
 local EnabledSpeed = false
-local Jumpoptions = "Lowhop" -- Default from dropdown
+local Jumpoptions = "Lowhop"
 local raycastparameters = RaycastParams.new()
 
--- GetSpeed function
 local function GetSpeed()
 	local speed = 0
 	if LocalPlayer.Character then
@@ -1621,7 +1601,6 @@ Speed = Blatant:CreateToggle({
 					
 					if LocalPlayer.Character.Humanoid.FloorMaterial ~= Enum.Material.Air and moveDirection ~= Vector3.zero and Jumpoptions ~= "" then
 						if Jumpoptions == "Normal" then
-							-- No action needed for Normal
 						elseif Jumpoptions == "AutoJump" then
 							LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 						elseif Jumpoptions == "Lowhop" then
@@ -1670,8 +1649,8 @@ Speed:CreateToggle({
 })
 -- Spider Module
 local SpiderEnabled = false
-local SpiderActive = false -- Assumed global boolean
-local SpiderSpeed = 50 -- Assumed default, adjust as needed
+local SpiderActive = false
+local SpiderSpeed = 50
 local loop = LoopManager.new()
 Spider = Blatant:CreateToggle({
 	Name = "Spider",
@@ -2211,14 +2190,13 @@ AntiVoid:CreateSlider({
 })
 
 
-BedNukerEnabled = false -- Global variable to track toggle state
+BedNukerEnabled = false 
 
 BedNuker = Utility:CreateToggle({
 	Name = "BedNuker",
 	Callback = function(Callback)
-		BedNukerEnabled = Callback -- Update global state
+		BedNukerEnabled = Callback
 		if BedNukerEnabled then
-			-- Reset highlight when starting
 			repeat
 				local success, loopResult = pcall(function()
 					task.wait(BreakSpeed)
@@ -2233,12 +2211,10 @@ BedNuker = Utility:CreateToggle({
 							if mag < BedDistance and bedwars["BlockEngine"]:isBlockBreakable({
 								blockPosition = getserverpos(bed.Position)
 							}, LocalPlayer) and not ((bed:GetAttribute('BedShieldEndTime') or 0) > workspace:GetServerTimeNow()) then
-								break -- Highlight only the first valid bed
+								break 
 							end
 						end
-						-- Highlight the bed block if HighlightBlockEnabled is true and a bed is found
 
-						-- Break the bed
 						for i, bed in pairs(beds) do
 							local mag = (bed.Position - localPosition).Magnitude
 							if mag < BedDistance and bedwars["BlockEngine"]:isBlockBreakable({
@@ -2248,7 +2224,7 @@ BedNuker = Utility:CreateToggle({
 								local wasBroken = breakBlock(bed, BedDistance, HighlightBlockEnabled)
 								if not wasBroken then
 									endnuker()
-									return true -- Restart loop to re-evaluate beds
+									return true
 								end
 								if BedNukerAnimation then
 									local animation = bedwars["AnimationUtil"]:playAnimation(LocalPlayer, bedwars["BlockEngine"]:getAnimationController():getAssetId(1))
@@ -2268,12 +2244,11 @@ BedNuker = Utility:CreateToggle({
 					print("Error in BedNuker loop: " .. tostring(loopResult))
 				end
 				if not loopResult then
-					break -- Exit the loop if the condition is met
+					break
 				end
-			until not BedNukerEnabled -- Check global state
+			until not BedNukerEnabled
 		else
-			shared.parts[1].Position = Vector3.new(0, -1000, 0) -- Move off-screen
-			-- Clear highlight when BedNuker is disabled
+			shared.parts[1].Position = Vector3.new(0, -1000, 0)
 			endnuker()
 		end
 	end
@@ -2431,7 +2406,7 @@ Utility:CreateToggle({
 	end
 })
 
--- Existing locals and UI setup
+
 local adjacent = {}
 local ScaffoldEnabled = false
 local ScaffoldButtonEnabled = false
@@ -2468,7 +2443,7 @@ for x = -3, 3, 3 do
 	end
 end
 
--- Check if there are adjacent blocks
+
 local function checkAdjacent(pos)
 	for _, v in ipairs(adjacent) do
 		if getPlacedBlock(pos + v) then
@@ -2478,9 +2453,8 @@ local function checkAdjacent(pos)
 	return false
 end
 
--- Get the appropriate block for scaffolding
 local function getScaffoldBlock()
-	local currentHand = GetInventory(LocalPlayer).items[1] -- Assuming hand is the first item
+	local currentHand = GetInventory(LocalPlayer).items[1]
 	if currentHand and bedwars["ItemMeta"][currentHand.itemType].block then
 		local isWool = currentHand.itemType:find("wool") ~= nil
 		if not WoolOnlyEnabled or isWool then
@@ -2534,17 +2508,14 @@ local function runScaffold()
 						if BuildAnimation then
 							bedwars["ViewmodelController"]:playAnimation(bedwars["AnimationType"].FP_USE_ITEM)
 						end
-						-- Create fake block
 						local fakeBlock = Instance.new("Part")
 						fakeBlock.Size = Vector3.new(3, 3, 3)
-						fakeBlock.Position = blockpos -- Align with block grid
-						fakeBlock.Transparency = 1 -- Invisible
+						fakeBlock.Position = blockpos
+						fakeBlock.Transparency = 1
 						fakeBlock.CanCollide = true
 						fakeBlock.Anchored = true
 						fakeBlock.Parent = workspace
-						-- Attempt to place real block
 						placeblock(wool, blockpos)
-						-- Remove fake block after placement attempt
 						fakeBlock:Destroy()
 					end
 				end
@@ -2557,7 +2528,6 @@ local function runScaffold()
 		end)
 	end
 end
--- Create the Scaffold toggle
 Scaffold = Utility:CreateToggle({
 	Name = "Scaffold",
 	Callback = function(Callback)
@@ -2612,7 +2582,6 @@ Scaffold:CreateToggle({
 	end
 })
 
--- Update the existing Scaffold button logic
 Scaffold:CreateToggle({
 	Name = "Scaffold Button",
 	Callback = function(Callback)
