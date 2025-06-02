@@ -21,7 +21,7 @@ Completely rewritten from scratch with the help of infinity yield and old raven 
 
 **Copy and paste the following loadstring and execute the script:**
    ```lua
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/Ace-B4/Raven-B4-For-Roblox/refs/heads/main/Raven%20B4%20Loader.lua"))()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/sstvskids/RavenForSolara/refs/heads/main/Raven%20B4%20Loader.lua"))()
    ```
 
 **Press `Right Shift`**
@@ -31,11 +31,13 @@ Completely rewritten from scratch with the help of infinity yield and old raven 
 
 **Blowsy/Chef/Hevex** - Original creator of Raven B4
 
+**Ace/Near** - Original creator of Raven B4 for Roblox
+
 **UI Blur** - [Roblox DevForum](https://devforum.roblox.com/t/ui-blur-automatic/2402850)
 
 **Arraylist Rainbow animations** - [Roblox DevForum](https://devforum.roblox.com/t/4-uigradient-animations-including-rainbow/557922)
 
-**Infinity yield** - Used to decompile scripts and view remotes
+**Infinite Yield** - Used to decompile scripts and view remotes
 
 *If you believe Raven B4 has used your code without credit and wish to be given credit, please contact me via Discord.*
 
