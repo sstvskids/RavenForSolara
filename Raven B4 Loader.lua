@@ -1,10 +1,10 @@
-
 local HttpRequest = request or http_request
-local HttpService = game:GetService("HttpService")
-local Players = game:GetService("Players")
+local cloneref = cloneref or function(v) return v end
+local HttpService = cloneref(game:GetService("HttpService"))
+local Players = cloneref(game:GetService("Players"))
 
-local BASE_URL = "https://github.com/Ace-B4/Raven-B4-For-Roblox/raw/refs/heads/main/"
-local RAW_BASE_URL = "https://raw.githubusercontent.com/Ace-B4/Raven-B4-For-Roblox/refs/heads/main"
+local BASE_URL = "https://github.com/sstvskids/RavenForSolara/raw/refs/heads/main/"
+local RAW_BASE_URL = "https://raw.githubusercontent.com/sstvskids/RavenForSolara/refs/heads/main"
 local RavenB4 = {}
 RavenB4.__index = RavenB4
 
@@ -29,7 +29,7 @@ function RavenB4.new()
 end
 
 function RavenB4:CheckExecutorSupport()
-    if not (writefile and readfile and makefolder and isfolder) then
+    if not (writefile or readfile or makefolder or isfolder) then
         Players.LocalPlayer:Kick("Executor is not supported, please use another executor for Raven B4!")
         return false
     end
@@ -131,6 +131,6 @@ end
 local raven = RavenB4.new()
 local lib = raven:Initialize()
 
-queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/Near-B4/Raven-B4-For-Roblox/refs/heads/main/Raven%20B4%20Loader.lua"))()')
+queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/sstvskids/RavenForSolara/refs/heads/main/Raven%20B4%20Loader.lua"))()')
 
 return lib
