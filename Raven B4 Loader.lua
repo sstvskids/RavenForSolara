@@ -1,7 +1,9 @@
---Raven B4 Loader or sum
+repeat task.wait(0.1) until game:IsLoaded() -- Wait for the game to load
+
 local HttpRequest = request or http_request
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
 local BASE_URL = "https://github.com/Ace-B4/Raven-B4-For-Roblox/raw/refs/heads/main/"
 local RAW_BASE_URL = "https://raw.githubusercontent.com/Ace-B4/Raven-B4-For-Roblox/refs/heads/main"
@@ -145,6 +147,7 @@ function RavenB4:Initialize()
     self:DownloadFonts()
 
     if self:DetectGame() then
+        print("see what could happen here")
         shared.RavenConfigName = "RavenB4/Config/" .. self.ConfigName
         shared.RavenB4Injected = true
         return self:LoadModules()
@@ -154,11 +157,17 @@ end
 local raven = RavenB4.new()
 local lib = raven:Initialize()
 local teleportactive = false
-game:GetService("Players").LocalPlayer.OnTeleport:Connect(function()
-    if shared.RavenB4Injected and teleportactive ~= true then --prevents multiple injections when testing
-        teleportactive = true
-        queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/Near-B4/Raven-B4-For-Roblox/refs/heads/main/Raven%20B4%20Loader.lua"))()')
-    end
+spawn(function()
+    repeat task.wait(0.1) until LocalPlayer ~= nil
+    LocalPlayer.OnTeleport:Connect(function()
+        if shared.RavenB4Injected and teleportactive ~= true then --prevents multiple injections when testing
+            teleportactive = true
+            if shared.devtesting then 
+                queue_on_teleport('loadstring(readfile("RavenB4s/ActualClient/ravenloader.lua"))()')
+            else
+                queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/Near-B4/Raven-B4-For-Roblox/refs/heads/main/Raven%20B4%20Loader.lua"))()')
+            end
+        end
+    end)
 end)
-
 return lib
