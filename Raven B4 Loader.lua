@@ -1,4 +1,4 @@
-
+--Raven B4 Loader or sum
 local HttpRequest = request or http_request
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -93,20 +93,43 @@ function RavenB4:DetectGame()
     return false
 end
 
+function stringload(arg1)
+    if shared.devtesting == true then
+        loadstring(readfile(arg1))()
+    else
+        loadstring(game:HttpGet(arg1))()
+    end
+end
+
 function RavenB4:LoadModules()
     local modulePath = shared.devtesting and "RavenB4s/ActualClient" or RAW_BASE_URL
+    local strings = {
+        functions = modulePath .. "/Functions/" .. self.GameName .. "functions.lua",
+        gui = modulePath .. "/GUI/RavenGUI.lua",
+        buttons = modulePath .. "/Functions/Buttonfunctions.lua",
+        games = modulePath .. "/Games/" .. self.GameName .. ".lua"
+    }
     local success, result = pcall(function()
-    lib = loadstring(game:HttpGet(modulePath .. "/GUI/RavenGUI.lua"))()
-    buttons = loadstring(game:HttpGet(modulePath .. "/Functions/Buttonfunctions.lua"))()
-    module = loadstring(game:HttpGet(modulePath .. "/Functions/" .. self.GameName .. "functions.lua"))()
-    loadstring(game:HttpGet(modulePath .. "/Games/" .. self.GameName .. ".lua"))()
-    return lib
+        if shared.devtesting then
+            module = loadstring(readfile(strings.functions))()
+        else
+            module = loadstring(game:HttpGet(strings.functions))()
+        end
     end)
     if not success then
         print("Failed to load modules: " .. tostring(result))
         return nil
     end
-    return result
+    if shared.devtesting then 
+        lib = loadstring(readfile(strings.gui))()
+        buttons = loadstring(readfile(strings.buttons))()
+        loadstring(readfile(strings.games))()
+    else
+        lib = loadstring(game:HttpGet(strings.gui))()
+        buttons = loadstring(game:HttpGet(strings.buttons))()
+        loadstring(game:HttpGet(strings.games))()
+    end
+    return lib
 end
 
 function RavenB4:Initialize()
@@ -122,7 +145,7 @@ function RavenB4:Initialize()
     self:DownloadFonts()
 
     if self:DetectGame() then
-        shared.RavenConfigName = self.ConfigName
+        shared.RavenConfigName = "RavenB4/Config/" .. self.ConfigName
         shared.RavenB4Injected = true
         return self:LoadModules()
     end
@@ -130,7 +153,12 @@ end
 
 local raven = RavenB4.new()
 local lib = raven:Initialize()
-
-queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/Near-B4/Raven-B4-For-Roblox/refs/heads/main/Raven%20B4%20Loader.lua"))()')
+local teleportactive = false
+game:GetService("Players").LocalPlayer.OnTeleport:Connect(function()
+    if shared.RavenB4Injected and teleportactive ~= true then --prevents multiple injections when testing
+        teleportactive = true
+        queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/Near-B4/Raven-B4-For-Roblox/refs/heads/main/Raven%20B4%20Loader.lua"))()')
+    end
+end)
 
 return lib
