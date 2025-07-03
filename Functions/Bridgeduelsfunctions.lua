@@ -202,7 +202,7 @@ local SwordAnimations = {
 }
 
 local function getGamemode(sub)
-	local path = replicatedStorage.Modules.ServerData.Cache
+	local path = ReplicatedStorage.Modules.ServerData.Cache
 	local jsonpath = HttpService:JSONDecode(path.Value)
 
 	return sub and jsonpath.Submode or jsonpath.Gamemode

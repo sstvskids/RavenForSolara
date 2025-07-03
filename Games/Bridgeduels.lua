@@ -327,7 +327,7 @@ Criticals = Combat:CreateToggle({
 	Name = "Critcals",
 })
 
-local reachpath = replicatedStorage.Constants.Melee.Reach
+local reachpath = ReplicatedStorage.Constants.Melee.Reach
 local loop = LoopManager.new()
 ReachRange = 16
 Reach = Combat:CreateToggle({
@@ -357,7 +357,7 @@ Velocity = Combat:CreateToggle({
 	Callback = function(Callback)
 		if Callback then
 			pcall(function()
-				local old = replicatedStorage.Modules.Knit.Services.CombatService.RE.KnockBackApplied
+				local old = ReplicatedStorage.Modules.Knit.Services.CombatService.RE.KnockBackApplied
 				old:Destroy()
 			end)
 		else
