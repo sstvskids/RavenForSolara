@@ -49,6 +49,7 @@ local CustomAnimationEnabled = false
 local NoAnimationEnabled = false
 local AnimationTime = 100
 local TransperancyValue = 50
+local Criticals = {}
 local Anglemax = 180
 
 local loop = LoopManager.new()
@@ -357,7 +358,6 @@ TargetHudModule:CreateSlider({
 	end
 })
 
-local Criticals
 Criticals = Combat:CreateToggle({
 	Name = "Critcals",
 })
