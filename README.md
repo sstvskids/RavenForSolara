@@ -39,7 +39,7 @@ Completely rewritten from scratch with the help of infinity yield and old raven 
 
 **Infinite Yield** - Used to decompile scripts and view remotes
 
-*If you believe Raven B4 has used your code without credit and wish to be given credit, please contact me via Discord.*
+*If you believe Raven B4 used your code without credit and want it removed or attributed, file an issue with evidence*
 
 ---
 
