@@ -7,7 +7,7 @@ local inputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local bridgeduels = module.bridgeduels
+local bridgeduels = shared.bridgeduelfuncs
 local SwordAnimations = module.SwordAnimations
 local store = module.store
 local GetClosest = module.GetClosest

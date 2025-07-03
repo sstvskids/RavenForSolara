@@ -27,6 +27,7 @@ local store = {
 }]]
 
 local bridgeduels = {}
+
 spawn(function()
     bridgeduels = {
 		Functions = {},
@@ -51,7 +52,8 @@ spawn(function()
         EnterQueue = bridgeduels.Functions.GetRemote("EnterQueue")
     }
 
-    repeat task.wait() until bridgeduels.Functions and bridgeduels.Functions.GetRemote and bridgeduels.Remotes
+    repeat task.wait() until bridgeduels.Functions and bridgeduels.Remotes
+	shared.bridgeduelfuncs = bridgeduels
 end)
 
 local function parsePositions(part, callback)
