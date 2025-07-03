@@ -7,7 +7,6 @@ local inputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local bridgeduels = shared.bridgeduelfuncs
 local SwordAnimations = module.SwordAnimations
 local store = module.store
 local GetClosest = module.GetClosest
@@ -16,6 +15,32 @@ local getTool = module.getTool
 local parsePositions = module.parsePositions
 local LoopManager = module.LoopManager
 local getGamemode = module.getGamemode
+local BridgeDuel = {}
+
+spawn(function()
+	BridgeDuel = {
+		Functions = {},
+		Remotes = {}
+	}
+
+	BridgeDuel.Functions.GetRemote = function(name: RemoteEvent | RemoteFunction): RemoteEvent | RemoteFunction
+		local remote
+		for _, v in pairs(game:GetDescendants()) do
+			if (v:IsA('RemoteEvent') or v:IsA('RemoteFunction')) and v.Name == name then
+				remote = v
+				break
+			end
+		end
+		if name == nil then Instance.new('RemoteEvent', name) end
+		return remote
+	end
+	BridgeDuel.Remotes = {
+		AttackPlayer = BridgeDuel.Functions.GetRemote('AttackPlayerWithSword'),
+		BlockSword = BridgeDuel.Functions.GetRemote('ToggleBlockSword'),
+        EnterQueue = BridgeDuel.Functions.GetRemote('PlaceBlock')
+	}
+	repeat task.wait() until BridgeDuel.Functions and BridgeDuel.Remotes
+end)
 
 local Boxes, SwingDelay = {}, tick()
 local animcompleted = true
@@ -55,8 +80,8 @@ Killaura = Combat:CreateToggle({
 					local delta = (Target.Character.HumanoidRootPart.Position - selfpos)
 					if delta.Magnitude > AttackRange then
 						if AutoBlock then
-							if bridgeduels.Functions and bridgeduels.Remotes then
-								bridgeduels.Remotes.BlockSword:InvokeServer(false, tool.Name)
+							if BridgeDuel.Functions and BridgeDuel.Remotes then
+								BridgeDuel.Remotes.BlockSword:InvokeServer(false, tool.Name)
 							end
 						end
 						Boxes.Adornee = nil
@@ -66,8 +91,8 @@ Killaura = Combat:CreateToggle({
 					local angle = math.acos(localfacing:Dot((delta * Vector3.new(1, 0, 1)).Unit))
 					if angle > (math.rad(Anglemax) / 2) then
 						if AutoBlock then
-							if bridgeduels.Functions and bridgeduels.Remotes then
-								bridgeduels.Remotes.BlockSword:InvokeServer(false, tool.Name)
+							if BridgeDuel.Functions and BridgeDuel.Remotes then
+								BridgeDuel.Remotes.BlockSword:InvokeServer(false, tool.Name)
 							end
 						end
 						BreakAnimation = true
@@ -75,15 +100,15 @@ Killaura = Combat:CreateToggle({
 						return
 					end
 					if AutoBlock and (delta.Magnitude < BlockRange) then
-						if bridgeduels.Functions and bridgeduels.Remotes then
-							bridgeduels.Remotes.BlockSword:InvokeServer(true, tool.Name)
+						if BridgeDuel.Functions and BridgeDuel.Remotes then
+							BridgeDuel.Remotes.BlockSword:InvokeServer(true, tool.Name)
 						end
 					end
 					if SwingDelay < tick() then
 						SwingDelay = tick() + 0.25
 						LocalPlayer.Character.Humanoid.Animator:LoadAnimation(tool.Animations.Swing):Play()
 						--[[if not CustomAnimationEnabled and not NoAnimationEnabled then
-							bridgeduels.ViewmodelController:PlayAnimation(tool.Name)
+							BridgeDuel.ViewmodelController:PlayAnimation(tool.Name)
 						end]]
 					end
 					if animcompleted and CustomAnimationEnabled and not NoAnimationEnabled then
@@ -130,9 +155,9 @@ Killaura = Combat:CreateToggle({
 							end
 						end)
 					end
-					--[[local bdent = bridgeduels.Entity.FindByCharacter(Target.Character)
+					--[[local bdent = BridgeDuel.Entity.FindByCharacter(Target.Character)
 					if bdent ~= nil then
-						bridgeduels.BlinkClient.item_action.attack_entity.fire({
+						BridgeDuel.BlinkClient.item_action.attack_entity.fire({
 							["target_entity_id"] = bdent.Id,
 							["is_crit"] = LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Y < 0,
 							["weapon_name"] = tool.Name,
@@ -142,12 +167,12 @@ Killaura = Combat:CreateToggle({
 								["those"] = workspace.Name == "Ok"
 							}
 						})
-						bridgeduels.ToolService:AttackPlayerWithSword(bdent.Id, LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Y < 0, tool.Name, "\226\128\139")
+						BridgeDuel.ToolService:AttackPlayerWithSword(bdent.Id, LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Y < 0, tool.Name, "\226\128\139")
 					end]]
 					print('what the heck')
-					if bridgeduels.Remotes and bridgeduels.Functions then
+					if BridgeDuel.Remotes and BridgeDuel.Functions then
 						print('what the helly?')
-						bridgeduels.Remotes.AttackPlayerWithSword:InvokeServer(Target.Character, Criticals.Enabled and true or LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Y < 0, tool.Name)
+						BridgeDuel.Remotes.AttackPlayerWithSword:InvokeServer(Target.Character, Criticals.Enabled and true or LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Y < 0, tool.Name)
 					end
 					Boxes.Adornee = Target.Character.HumanoidRootPart
 					Boxes.Color3 = Color3.fromRGB(204, 0, 204)
@@ -533,12 +558,12 @@ Scaffold = Blatant:CreateToggle({
                                 fakeBlock:AddTag('TempBlock')
                                 fakeBlock:AddTag('Block')
                                 fakeBlock.Parent = workspace.Map
-                                bridgeduels.EffectsController:PlaySound(targetPosition)
+                                BridgeDuel.EffectsController:PlaySound(targetPosition)
                                 if not IsBlockdeleteenabled then
-                                    bridgeduels.Entity.LocalEntity:RemoveTool('Blocks', 1)
+                                    BridgeDuel.Entity.LocalEntity:RemoveTool('Blocks', 1)
                                 end
                                 task.spawn(function()
-                                    local suc, block = bridgeduels.BlinkClient.item_action.place_block.invoke({
+                                    local suc, block = BridgeDuel.BlinkClient.item_action.place_block.invoke({
                                         position = targetPosition,
                                         block_type = 'Clay',
                                         extra = {
@@ -549,7 +574,7 @@ Scaffold = Blatant:CreateToggle({
                                     })
                                     fakeBlock:Destroy()
                                     if not (suc or block) and not IsBlockdeleteenabled then
-                                        bridgeduels.Entity.LocalEntity:RemoveTool('Blocks', 1)
+                                        BridgeDuel.Entity.LocalEntity:RemoveTool('Blocks', 1)
                                     end
                                 end)
                             end
@@ -621,7 +646,7 @@ Scaffold:CreateSlider({
 
 --[[local Breaker
 local function getPickaxe()
-	for name in bridgeduels.Entity.LocalEntity.Inventory do
+	for name in BridgeDuel.Entity.LocalEntity.Inventory do
 		if name:find('Pickaxe') then
 			return name
 		end
@@ -657,17 +682,17 @@ Breaker = Blatant:CreateToggle({
 								breakTime = os.clock() + 0.3
                                         --fake2.Position = breakPosition
                                         --fake2.Transparency = 0
-								bridgeduels.BlinkClient.item_action.start_break_block.fire({
+								BridgeDuel.BlinkClient.item_action.start_break_block.fire({
 									position = breakPosition,
 									pickaxe_name = pickaxe,
 									timestamp = workspace:GetServerTimeNow()
 								})
 							else 
-								bridgeduels.BlinkClient.item_action.stop_break_block.fire(false)
+								BridgeDuel.BlinkClient.item_action.stop_break_block.fire(false)
 							end
 							lastBreak = breakPosition
 						elseif breakPosition and breakTime < os.clock() then
-								bridgeduels.BlinkClient.item_action.stop_break_block.fire(true)
+								BridgeDuel.BlinkClient.item_action.stop_break_block.fire(true)
 								breakTime = os.clock() + 100
 						end
 					else
@@ -1055,10 +1080,10 @@ Utility:CreateToggle({
 	Name = "Cps Check Remover",
 	Callback = function(Callback)
 		if Callback then
-			old3 = hookfunction(bridgeduels.BlinkClient.player_state.update_cps.fire, function ()
+			old3 = hookfunction(BridgeDuel.BlinkClient.player_state.update_cps.fire, function ()
 			end)
 		else
-			hookfunction(bridgeduels.BlinkClient.player_state.update_cps.fire, old3)
+			hookfunction(BridgeDuel.BlinkClient.player_state.update_cps.fire, old3)
 			old3 = nil
 		end
 	end
@@ -1100,8 +1125,8 @@ AutoQueue = Utility:CreateToggle({
 			else
 				gamemode = apoption
 			end
-			if bridgeduels.Functions and bridgeduels.Remotes then
-				bridgeduels.Remotes.EnterQueue:InvokeServer(gamemode)
+			if BridgeDuel.Functions and BridgeDuel.Remotes then
+				BridgeDuel.Remotes.EnterQueue:InvokeServer(gamemode)
 			end
 		end
 	end
@@ -1139,8 +1164,8 @@ ReQueue = Utility:CreateToggle({
 	Name = "Re Queue",
 	Callback = function(Callback)
 		if Callback then
-			if bridgeduels.Functions and bridgeduels.Remotes then
-				bridgeduels.Remotes.EnterQueue:InvokeServer(apoption2)
+			if BridgeDuel.Functions and BridgeDuel.Remotes then
+				BridgeDuel.Remotes.EnterQueue:InvokeServer(apoption2)
 			end
 		end
 	end

@@ -26,36 +26,6 @@ local store = {
 	Communication = require(ReplicatedStorage.Client.Communication)
 }]]
 
-local bridgeduels = {}
-
-spawn(function()
-    bridgeduels = {
-		Functions = {},
-		Remotes = {}
-	}
-    
-    bridgeduels.Functions.GetRemote = function(name: RemoteEvent | RemoteFunction): RemoteEvent | RemoteFunction
-        local remote
-        for _, v in pairs(game:GetDescendants()) do
-            if (v:IsA('RemoteEvent') or v:IsA('RemoteFunction')) and v.Name == name then
-                remote = v
-                break
-            end
-        end
-        if name == nil then Instance.new('RemoteEvent', name) end
-        return remote
-    end
-
-    bridgeduels.Remotes = {
-        AttackPlayer = bridgeduels.Functions.GetRemote("AttackPlayerWithSword"),
-        BlockSword = bridgeduels.Functions.GetRemote("ToggleBlockSword"),
-        EnterQueue = bridgeduels.Functions.GetRemote("EnterQueue")
-    }
-
-    repeat task.wait() until bridgeduels.Functions and bridgeduels.Remotes
-	shared.bridgeduelfuncs = bridgeduels
-end)
-
 local function parsePositions(part, callback)
 	if not part:IsA("Part") then
 		return
@@ -218,7 +188,6 @@ local function getGamemode(sub)
 end
 
 return {
-	bridgeduels = bridgeduels,
 	SwordAnimations = SwordAnimations,
 	store = store,
 	GetClosest = GetClosest,
