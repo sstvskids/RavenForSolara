@@ -144,7 +144,9 @@ Killaura = Combat:CreateToggle({
 						})
 						bridgeduels.ToolService:AttackPlayerWithSword(bdent.Id, LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Y < 0, tool.Name, "\226\128\139")
 					end]]
+					print('what the heck')
 					if bridgeduels.Remotes and bridgeduels.Functions then
+						print('what the helly?')
 						bridgeduels.Remotes.AttackPlayerWithSword:InvokeServer(Target.Character, Criticals.Enabled and true or LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Y < 0, tool.Name)
 					end
 					Boxes.Adornee = Target.Character.HumanoidRootPart
