@@ -47,9 +47,9 @@ local animcompleted = true
 local BreakAnimation = false
 local CustomAnimationEnabled = false
 local NoAnimationEnabled = false
+local critsenabled = false
 local AnimationTime = 100
 local TransperancyValue = 50
-local critsenabled
 local Anglemax = 180
 
 local loop = LoopManager.new()
