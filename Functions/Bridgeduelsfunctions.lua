@@ -27,24 +27,28 @@ local store = {
 }]]
 
 local bridgeduels = {
-	Functions = {
-		GetRemote = function(name: RemoteEvent | RemoteFunction): RemoteEvent | RemoteFunction
-			local remote
-			for _, v in pairs(game:GetDescendants()) do
-				if (v:IsA('RemoteEvent') or v:IsA('RemoteFunction')) and v.Name == name then
-					remote = v
-					break
-				end
+	Functions = {},
+	Remotes = {}
+
+	bridgeduels.Functions.GetRemote = function(name: RemoteEvent | RemoteFunction): RemoteEvent | RemoteFunction
+		local remote
+		for _, v in pairs(game:GetDescendants()) do
+			if (v:IsA('RemoteEvent') or v:IsA('RemoteFunction')) and v.Name == name then
+				remote = v
+				break
 			end
-			if name == nil then Instance.new('RemoteEvent', name) end
-			return remote
 		end
-	},
-	Remotes = {
+		if name == nil then Instance.new('RemoteEvent', name) end
+		return remote
+	end
+
+	bridgeduels.Remotes = {
 		AttackPlayer = bridgeduels.Functions.GetRemote("AttackPlayerWithSword"),
 		BlockSword = bridgeduels.Functions.GetRemote("ToggleBlockSword"),
 		EnterQueue = bridgeduels.Functions.GetRemote("EnterQueue")
 	}
+
+	repeat task.wait() until bridgeduels.Functions and bridgeduels.Functions.GetRemote and bridgeduels.Remotes
 }
 
 local function parsePositions(part, callback)
