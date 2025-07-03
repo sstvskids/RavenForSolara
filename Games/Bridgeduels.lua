@@ -343,10 +343,11 @@ Reach = Combat:CreateToggle({
 	Callback = function(Callback)
 		if Callback then
 			loop:AddTask('Reach', function()
-				reachpath.value = ReachRange
+				reachpath.Value = ReachRange
 			end)
 		else
-			reachpath.value = 9
+			reachpath.Value = 9
+			loop = LoopManager.new()
 		end
 	end
 })
