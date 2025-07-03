@@ -49,7 +49,7 @@ local CustomAnimationEnabled = false
 local NoAnimationEnabled = false
 local AnimationTime = 100
 local TransperancyValue = 50
-local Criticals = {}
+local critsenabled
 local Anglemax = 180
 
 local loop = LoopManager.new()
@@ -173,7 +173,7 @@ Killaura = Combat:CreateToggle({
 					print('what the heck')
 					if BridgeDuel.Remotes and BridgeDuel.Functions then
 						print('what the helly?')
-						BridgeDuel.Remotes.AttackPlayerWithSword:InvokeServer(Target.Character, Criticals.Enabled and true or LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Y < 0, tool.Name)
+						BridgeDuel.Remotes.AttackPlayerWithSword:InvokeServer(Target.Character, critsenabled == true and true or LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Y < 0, tool.Name)
 					end
 					Boxes.Adornee = Target.Character.HumanoidRootPart
 					Boxes.Color3 = Color3.fromRGB(204, 0, 204)
@@ -358,8 +358,12 @@ TargetHudModule:CreateSlider({
 	end
 })
 
+local Critcals
 Criticals = Combat:CreateToggle({
 	Name = "Critcals",
+	Function = function(callback)
+		critsenabled = callback
+	end
 })
 
 local reachpath = ReplicatedStorage.Constants.Melee.Reach
