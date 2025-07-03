@@ -55,7 +55,9 @@ Killaura = Combat:CreateToggle({
 					local delta = (Target.Character.HumanoidRootPart.Position - selfpos)
 					if delta.Magnitude > AttackRange then
 						if AutoBlock then
-							bridgeduels.Remotes.BlockSword:InvokeServer(false, tool.Name)
+							if bridgeduels.Functions and bridgeduels.Remotes then
+								bridgeduels.Remotes.BlockSword:InvokeServer(false, tool.Name)
+							end
 						end
 						Boxes.Adornee = nil
 						BreakAnimation = true
@@ -64,14 +66,18 @@ Killaura = Combat:CreateToggle({
 					local angle = math.acos(localfacing:Dot((delta * Vector3.new(1, 0, 1)).Unit))
 					if angle > (math.rad(Anglemax) / 2) then
 						if AutoBlock then
-							bridgeduels.Remotes.BlockSword:InvokeServer(false, tool.Name)
+							if bridgeduels.Functions and bridgeduels.Remotes then
+								bridgeduels.Remotes.BlockSword:InvokeServer(false, tool.Name)
+							end
 						end
 						BreakAnimation = true
 						Boxes.Adornee = nil
 						return
 					end
 					if AutoBlock and (delta.Magnitude < BlockRange) then
-						bridgeduels.Remotes.BlockSword:InvokeServer(true, tool.Name)
+						if bridgeduels.Functions and bridgeduels.Remotes then
+							bridgeduels.Remotes.BlockSword:InvokeServer(true, tool.Name)
+						end
 					end
 					if SwingDelay < tick() then
 						SwingDelay = tick() + 0.25
@@ -138,7 +144,9 @@ Killaura = Combat:CreateToggle({
 						})
 						bridgeduels.ToolService:AttackPlayerWithSword(bdent.Id, LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Y < 0, tool.Name, "\226\128\139")
 					end]]
-					bridgeduels.Remotes.AttackPlayerWithSword:InvokeServer(Target.Character, Criticals.Enabled and true or LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Y < 0, tool.Name)
+					if bridgeduels.Remotes and bridgeduels.Functions then
+						bridgeduels.Remotes.AttackPlayerWithSword:InvokeServer(Target.Character, Criticals.Enabled and true or LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Y < 0, tool.Name)
+					end
 					Boxes.Adornee = Target.Character.HumanoidRootPart
 					Boxes.Color3 = Color3.fromRGB(204, 0, 204)
 					Boxes.Transparency = (TransperancyValue / 100)
@@ -1089,7 +1097,9 @@ AutoQueue = Utility:CreateToggle({
 			else
 				gamemode = apoption
 			end
-			game:GetService("ReplicatedStorage").Modules.Knit.Services.MatchService.RF.EnterQueue:InvokeServer(gamemode)
+			if bridgeduels.Functions and bridgeduels.Remotes then
+				bridgeduels.Remotes.EnterQueue:InvokeServer(gamemode)
+			end
 		end
 	end
 })
@@ -1126,7 +1136,9 @@ ReQueue = Utility:CreateToggle({
 	Name = "Re Queue",
 	Callback = function(Callback)
 		if Callback then
-			bridgeduels.Remotes.EnterQueue:InvokeServer(apoption2)
+			if bridgeduels.Functions and bridgeduels.Remotes then
+				bridgeduels.Remotes.EnterQueue:InvokeServer(apoption2)
+			end
 		end
 	end
 })
