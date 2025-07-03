@@ -26,11 +26,12 @@ local store = {
 	Communication = require(ReplicatedStorage.Client.Communication)
 }]]
 
+local bridgeduels = {}
 spawn(function()
-    local bridgeduels = {
-        Functions = {},
-        Remotes = {}
-    }
+    bridgeduels = {
+		Functions = {},
+		Remotes = {}
+	}
     
     bridgeduels.Functions.GetRemote = function(name: RemoteEvent | RemoteFunction): RemoteEvent | RemoteFunction
         local remote
@@ -75,7 +76,7 @@ local function parsePositions(part, callback)
 	end
 end
 
-task.spawn(function()
+--[[task.spawn(function()
 	local map = workspace:WaitForChild('Map', 99999)
 	if not map then
 		return
@@ -102,7 +103,7 @@ task.spawn(function()
 			store.serverBlocks[pos] = descendant
 		end)
 	end
-end)
+end)]]
 
 local function IsAlive(plr)
 	plr = plr or LocalPlayer
