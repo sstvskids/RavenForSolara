@@ -1,7 +1,11 @@
+repeat task.wait(0.1) until game:IsLoaded() -- Wait for the game to load
+
 local HttpRequest = request or http_request
-local cloneref = cloneref or function(v) return v end
+
+local cloneref = cloneref or function(obj) return obj end
 local HttpService = cloneref(game:GetService("HttpService"))
 local Players = cloneref(game:GetService("Players"))
+local LocalPlayer = Players.LocalPlayer
 
 local BASE_URL = "https://github.com/sstvskids/RavenForSolara/raw/refs/heads/main/"
 local RAW_BASE_URL = "https://raw.githubusercontent.com/sstvskids/RavenForSolara/refs/heads/main"
@@ -29,7 +33,7 @@ function RavenB4.new()
 end
 
 function RavenB4:CheckExecutorSupport()
-    if not (writefile or readfile or makefolder or isfolder) then
+    if not (writefile and readfile and makefolder and isfolder) then
         Players.LocalPlayer:Kick("Executor is not supported, please use another executor for Raven B4!")
         return false
     end
@@ -93,25 +97,48 @@ function RavenB4:DetectGame()
     return false
 end
 
+function stringload(arg1)
+    if shared.devtesting == true then
+        loadstring(readfile(arg1))()
+    else
+        loadstring(game:HttpGet(arg1))()
+    end
+end
+
 function RavenB4:LoadModules()
     local modulePath = shared.devtesting and "RavenB4s/ActualClient" or RAW_BASE_URL
+    local strings = {
+        functions = modulePath .. "/Functions/" .. self.GameName .. "functions.lua",
+        gui = modulePath .. "/GUI/RavenGUI.lua",
+        buttons = modulePath .. "/Functions/Buttonfunctions.lua",
+        games = modulePath .. "/Games/" .. self.GameName .. ".lua"
+    }
     local success, result = pcall(function()
-    lib = loadstring(game:HttpGet(modulePath .. "/GUI/RavenGUI.lua"))()
-    buttons = loadstring(game:HttpGet(modulePath .. "/Functions/Buttonfunctions.lua"))()
-    module = loadstring(game:HttpGet(modulePath .. "/Functions/" .. self.GameName .. "functions.lua"))()
-    loadstring(game:HttpGet(modulePath .. "/Games/" .. self.GameName .. ".lua"))()
-    return lib
+        if shared.devtesting then
+            module = loadstring(readfile(strings.functions))()
+        else
+            module = loadstring(game:HttpGet(strings.functions))()
+        end
     end)
     if not success then
         print("Failed to load modules: " .. tostring(result))
         return nil
     end
-    return result
+    if shared.devtesting then 
+        lib = loadstring(readfile(strings.gui))()
+        buttons = loadstring(readfile(strings.buttons))()
+        loadstring(readfile(strings.games))()
+    else
+        lib = loadstring(game:HttpGet(strings.gui))()
+        buttons = loadstring(game:HttpGet(strings.buttons))()
+        loadstring(game:HttpGet(strings.games))()
+    end
+    return lib
 end
 
 function RavenB4:Initialize()
     if shared.RavenB4Injected then
-        error("RavenB4 is already injected!")
+        error("RavenB4 is already injected!", 2)
     end
 
     if not self:CheckExecutorSupport() then
@@ -122,7 +149,8 @@ function RavenB4:Initialize()
     self:DownloadFonts()
 
     if self:DetectGame() then
-        shared.RavenConfigName = self.ConfigName
+        --print("see what could happen here") unless you want detections, sure!
+        shared.RavenConfigName = "RavenB4/Config/" .. self.ConfigName
         shared.RavenB4Injected = true
         return self:LoadModules()
     end
@@ -130,7 +158,20 @@ end
 
 local raven = RavenB4.new()
 local lib = raven:Initialize()
+local teleportactive = false
 
-queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/sstvskids/RavenForSolara/refs/heads/main/Raven%20B4%20Loader.lua"))()')
+spawn(function()
+    repeat task.wait(0.1) until LocalPlayer ~= nil
+    LocalPlayer.OnTeleport:Connect(function()
+        if shared.RavenB4Injected and teleportactive ~= true then -- prevents multiple injections when testing
+            teleportactive = true
+            if shared.devtesting then 
+                queue_on_teleport('loadstring(readfile("RavenB4s/ActualClient/ravenloader.lua"))()')
+            else
+                queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/sstvskids/RavenForSolara/refs/heads/main/Raven%20B4%20Loader.lua"))()')
+            end
+        end
+    end)
+end)
 
 return lib

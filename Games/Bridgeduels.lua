@@ -15,7 +15,7 @@ local IsAlive = module.IsAlive
 local getTool = module.getTool
 local parsePositions = module.parsePositions
 local LoopManager = module.LoopManager
-
+local getGamemode = module.getGamemode
 
 local Boxes, SwingDelay = {}, tick()
 local animcompleted = true
@@ -39,7 +39,7 @@ Killaura = Combat:CreateToggle({
 				end
 				local tool = getTool()
 				local Target
-				if bridgeduels.Communication.gamemode.value == "Special" then
+				if getGamemode() == "Special" then
                     Target = GetClosest()
                 else
                     Target = GetClosest(TeamCheckEnabled)
@@ -55,7 +55,7 @@ Killaura = Combat:CreateToggle({
 					local delta = (Target.Character.HumanoidRootPart.Position - selfpos)
 					if delta.Magnitude > AttackRange then
 						if AutoBlock then
-							bridgeduels.ToolService:ToggleBlockSword(false, tool.Name)
+							bridgeduels.Remotes.BlockSword:InvokeServer(false, tool.Name)
 						end
 						Boxes.Adornee = nil
 						BreakAnimation = true
@@ -64,21 +64,21 @@ Killaura = Combat:CreateToggle({
 					local angle = math.acos(localfacing:Dot((delta * Vector3.new(1, 0, 1)).Unit))
 					if angle > (math.rad(Anglemax) / 2) then
 						if AutoBlock then
-							bridgeduels.ToolService:ToggleBlockSword(false, tool.Name)
+							bridgeduels.Remotes.BlockSword:InvokeServer(false, tool.Name)
 						end
 						BreakAnimation = true
 						Boxes.Adornee = nil
 						return
 					end
 					if AutoBlock and (delta.Magnitude < BlockRange) then
-						bridgeduels.ToolService:ToggleBlockSword(true, tool.Name)
+						bridgeduels.Remotes.BlockSword:InvokeServer(true, tool.Name)
 					end
 					if SwingDelay < tick() then
 						SwingDelay = tick() + 0.25
 						LocalPlayer.Character.Humanoid.Animator:LoadAnimation(tool.Animations.Swing):Play()
-						if not CustomAnimationEnabled and not NoAnimationEnabled then
+						--[[if not CustomAnimationEnabled and not NoAnimationEnabled then
 							bridgeduels.ViewmodelController:PlayAnimation(tool.Name)
-						end
+						end]]
 					end
 					if animcompleted and CustomAnimationEnabled and not NoAnimationEnabled then
 						animcompleted = false
@@ -124,7 +124,7 @@ Killaura = Combat:CreateToggle({
 							end
 						end)
 					end
-					local bdent = bridgeduels.Entity.FindByCharacter(Target.Character)
+					--[[local bdent = bridgeduels.Entity.FindByCharacter(Target.Character)
 					if bdent ~= nil then
 						bridgeduels.BlinkClient.item_action.attack_entity.fire({
 							["target_entity_id"] = bdent.Id,
@@ -137,7 +137,8 @@ Killaura = Combat:CreateToggle({
 							}
 						})
 						bridgeduels.ToolService:AttackPlayerWithSword(bdent.Id, LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Y < 0, tool.Name, "\226\128\139")
-					end
+					end]]
+					bridgeduels.Remotes.AttackPlayerWithSword:InvokeServer(Target.Character, Criticals.Enabled and true or LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Y < 0, tool.Name)
 					Boxes.Adornee = Target.Character.HumanoidRootPart
 					Boxes.Color3 = Color3.fromRGB(204, 0, 204)
 					Boxes.Transparency = (TransperancyValue / 100)
@@ -253,6 +254,7 @@ Killaura:CreateSlider({
 		AnimationTime = Callback
 	end
 })
+
 local TargetHudRange = 25
 TargetHudModule = Client:CreateToggle({
 	Name = "Target Hud",
@@ -266,7 +268,7 @@ TargetHudModule = Client:CreateToggle({
 				end
 				GetClosestPlayer = GetClosest()
 				if GetClosestPlayer ~= nil then
-					if bridgeduels.Communication.gamemode.value ~= "Special" and TargetTeamCheckEnabled and GetClosest().TeamColor == LocalPlayer.TeamColor then
+					if getGamemode() ~= "Special" and TargetTeamCheckEnabled and GetClosest().TeamColor == LocalPlayer.TeamColor then
 						continue
 					end
 					local Magnitude = (LocalPlayer.Character:FindFirstChild("HumanoidRootPart").Position - GetClosestPlayer.Character:FindFirstChild("HumanoidRootPart").Position).Magnitude
@@ -319,36 +321,24 @@ TargetHudModule:CreateSlider({
 		TargetHudRange = Callback
 	end
 })
-local old2
-Combat:CreateToggle({
+
+local Criticals
+Criticals = Combat:CreateToggle({
 	Name = "Critcals",
-	Callback = function(Callback)
-		if Callback then
-			old2 = hookfunction(bridgeduels.BlinkClient.item_action.attack_entity.fire, function(...)
-				local data = ...
-				if type(data) == 'table' then
-					rawset(data, 'is_crit', true)
-				end
-				return old2(...)
-			end)
-		else
-			hookfunction(bridgeduels.BlinkClient.Blink.item_action.attack_entity.fire, old2)
-			old2 = nil
-		end
-	end
 })
+
+local reachpath = replicatedStorage.Constants.Melee.Reach
+local loop = LoopManager.new()
 ReachRange = 16
 Reach = Combat:CreateToggle({
 	Name = "Reach",
 	Callback = function(Callback)
 		if Callback then
-			old = rawget(bridgeduels.CombatConstants, 'REACH_IN_STUDS')
-			rawset(bridgeduels.CombatConstants, 'REACH_IN_STUDS', ReachRange)
-			rawset(bridgeduels.Entity.LocalEntity, 'Reach', ReachRange)
+			loop:AddTask('Reach', function()
+				reachpath.value = ReachRange
+			end)
 		else
-			rawset(bridgeduels.CombatConstants, 'REACH_IN_STUDS', old)
-			rawset(bridgeduels.Entity.LocalEntity, 'Reach', old)
-			old = nil
+			reachpath.value = 9
 		end
 	end
 })
@@ -361,55 +351,21 @@ Reach:CreateSlider({
 		ReachRange = Callback
 	end
 })
-local VelocityHorizontal = 100
-local VelocityVertical = 100
-local applyKnockback
-local connection
-local function velocityFunction(velo, ...)
-	local hort, vert = (VelocityHorizontal / 100), (VelocityVertical / 100)
-	if hort == 0 and vert == 0 then
-		return
-	end
-	velo = Vector3.new(velo.X * hort, velo.Y * vert, velo.Z * hort)
-	return applyKnockback(velo, ...)
-end
+
 Velocity = Combat:CreateToggle({
 	Name = "Velocity",
 	Callback = function(Callback)
 		if Callback then
-			connection = getconnections(bridgeduels.CombatService.KnockBackApplied._re.OnClientEvent)[1]
-			if not connection then
-				return
-			end
-			applyKnockback = hookfunction(connection.Function, function(...)
-				return velocityFunction(...)
+			pcall(function()
+				local old = replicatedStorage.Modules.Knit.Services.CombatService.RE.KnockBackApplied
+				old:Destroy()
 			end)
 		else
-			if applyKnockback then
-				hookfunction(connection.Function, applyKnockback)
-			end
-			connection = nil
+			shared:createnotification('Velocity will be disabled next game', 5, 'Raven')
 		end
 	end
 })
-Velocity:CreateSlider({
-	Name = "Horizontal",
-	Default = 0,
-	Min = 0,
-	Max = 100,
-	Callback = function(Callback)
-		VelocityHorizontal = Callback
-	end
-})
-Velocity:CreateSlider({
-	Name = "Vertical",
-	Default = 0,
-	Min = 0,
-	Max = 100,
-	Callback = function(Callback)
-		VelocityVertical = Callback
-	end
-})
+
 EnabledFly = false
 FlyDown = false
 FlyUp = false
@@ -472,7 +428,8 @@ Fly:CreateSlider({
 		DownValue = Callback
 	end
 })
-local isTowerActive = false
+
+--[[local isTowerActive = false
 local isLimitItemActive = false
 local isKeepYActive = false
 local isShowBlockCountActive = false
@@ -649,8 +606,9 @@ Scaffold:CreateSlider({
     Callback = function(Callback)
         towerSpeed = Callback
     end
-})
-local Breaker
+})]]
+
+--[[local Breaker
 local function getPickaxe()
 	for name in bridgeduels.Entity.LocalEntity.Inventory do
 		if name:find('Pickaxe') then
@@ -723,7 +681,8 @@ Breaker:CreateSlider({
 	Callback = function(Callback)
 		BreakerRange = Callback
 	end
-})
+})]]
+
 local NewSpeed = 23
 local raycastparameters = RaycastParams.new()
 local Jumpoptions = ""
@@ -791,6 +750,7 @@ Speed:CreateSlider({
 		NewSpeed = Callback - 0.01
 	end
 })
+
 HighJump = Blatant:CreateToggle({
 	Name = "HighJump",
 	Callback = function(Callback)
@@ -823,6 +783,7 @@ HighJump:CreateSlider({
 		JumpHeight = Callback
 	end
 })
+
 local CheckInfJump = false
 Blatant:CreateToggle({
 	Name = "INF Jump",
@@ -840,6 +801,7 @@ Blatant:CreateToggle({
 		end
 	end
 })
+
 Render:CreateToggle({
 	Name = "Bed Esp",
 	Callback = function(Callback)
@@ -867,6 +829,7 @@ Render:CreateToggle({
 		end
 	end
 })
+
 local Lighting = game:GetService("Lighting")
 local Sky
 Render:CreateToggle({
@@ -890,6 +853,7 @@ Render:CreateToggle({
 		end
 	end
 })
+
 local Atmosphere
 Render:CreateToggle({
 	Name = "Atmosphere",
@@ -907,6 +871,7 @@ Render:CreateToggle({
 		end
 	end
 })
+
 local round2 = function(...)
 	local a = {}
 	for i, v in next, table.pack(...) do
@@ -1000,6 +965,7 @@ ESP:CreateToggle({
 		ESPTeamCheck = Callback
 	end
 })
+
 Render:CreateToggle({
 	Name = "FPS Unlocker",
 	Callback = function(Callback)
@@ -1009,11 +975,12 @@ Render:CreateToggle({
 		end
 	end
 })
+
 local ConnectionSlowdown = nil
 NoSlow = Utility:CreateToggle({
 	Name = "No Slow",
 	Callback = function(Callback)
-		if Callback then
+		if Callback and not Fly.Enabled then
 			game:GetService("RunService").Heartbeat:Connect(function()
 				local bodyVelocity = Instance.new("BodyVelocity")
 				bodyVelocity.MaxForce = Vector3.new(math.huge, 0, math.huge)
@@ -1044,16 +1011,20 @@ NoSlow:CreateDropDown({ --made for later
 	Callback = function(Callback)
 	end
 })
-local old
+
+local Nofall
+local loop = LoopManager.new()
 Nofall = Utility:CreateToggle({
 	Name = "No Fall",
 	Callback = function(Callback)
 		if Callback then
-			old = hookfunction(bridgeduels.BlinkClient.player_state.take_fall_damage.fire, function ()
+			loop:AddTask("Nofall", function()
+				if LocalPlayer.character.Humanoid.FloorMaterial == Enum.Material.Air and (LocalPlayer.character.Humanoid:GetState() == Enum.HumanoidStateType.Freefall or LocalPlayer.character.Humanoid:GetState() == Enum.HumanoidStateType.FallingDown) then
+					LocalPlayer.character.Humanoid:ChangeState(Enum.HumanoidStateType.Landed)
+				end
 			end)
 		else
-			hookfunction(bridgeduels.BlinkClient.player_state.take_fall_damage.fire, old)
-			old = nil
+			loop = LoopManager.new()
 		end
 	end
 })
@@ -1067,6 +1038,7 @@ Nofall:CreateDropDown({ --made for later
 	Callback = function(Callback)
 	end
 })
+
 local old3
 Utility:CreateToggle({
 	Name = "Cps Check Remover",
@@ -1080,6 +1052,7 @@ Utility:CreateToggle({
 		end
 	end
 })
+
 Utility:CreateToggle({
 	Name = "No Jumpscare",
 	Callback = function(Callback)
@@ -1090,8 +1063,10 @@ Utility:CreateToggle({
 		end
 	end
 })
+
 local apoption = "BedWarsDuos"
 local autodtcmode = false
+local gamemode
 AutoQueue = Utility:CreateToggle({
 	Name = "AutoQueue",
 	Callback = function(Callback)
@@ -1101,30 +1076,20 @@ AutoQueue = Utility:CreateToggle({
 			else
 				print("not visible")
 			end
-			print(bridgeduels.Communication.gamemode.value)
+			print(getGamemode())
 			repeat
 				task.wait(1)
 			until LocalPlayer.PlayerGui.Hotbar.MainFrame.GameEndFrame.Visible == true
 			if not Callback then
-				return
+				return -- nigga what
 			end
-			local gamemode
+
 			if autodtcmode then
-				if bridgeduels.Communication.gamemode.value == "Bedwars" then
-					gamemode = "BedWarsDuos"
-				elseif bridgeduels.Communication.gamemode.value == "BasicFight" then
-					gamemode = "BasicFightSolo"
-				elseif bridgeduels.Communication.gamemode.value == "Boxing" then
-					gamemode = "BoxingSolo"
-				else
-					gamemode = "Solo"
-				end
+				gamemode = getGamemode(true)
 			else
 				gamemode = apoption
 			end
-			game:GetService("ReplicatedStorage").Modules.Knit.Services.MatchService.RF.EnterQueue:InvokeServer(
-                    gamemode
-                )
+			game:GetService("ReplicatedStorage").Modules.Knit.Services.MatchService.RF.EnterQueue:InvokeServer(gamemode)
 		end
 	end
 })
@@ -1155,14 +1120,13 @@ AutoQueue:CreateToggle({
 		autodtcmode = Callback
 	end
 })
+
 local apoption2 = "RankedSolo"
 ReQueue = Utility:CreateToggle({
 	Name = "Re Queue",
 	Callback = function(Callback)
 		if Callback then
-			game:GetService("ReplicatedStorage").Modules.Knit.Services.MatchService.RF.EnterQueue:InvokeServer(
-                    apoption2
-                )
+			bridgeduels.Remotes.EnterQueue:InvokeServer(apoption2)
 		end
 	end
 })
@@ -1188,9 +1152,10 @@ ReQueue:CreateDropDown({ --made for later
 		apoption2 = Callback
 	end
 })
+
 local connect
 Utility:CreateToggle({
-	Name = "Staffleave",
+	Name = "StaffLeave",
 	Callback = function(Callback)
 		if Callback then
 			for i, v in pairs(game:GetService('Players'):GetChildren()) do

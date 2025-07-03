@@ -1,10 +1,13 @@
+local cloneref = cloneref or function(obj) return obj end
 
-local Players = game:GetService("Players")
+local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
+local inputService = cloneref(game:GetService("UserInputService"))
+local HttpService = cloneref(game:GetService("HttpService"))
+local RunService = cloneref(game:GetService("RunService"))
+local workspace = cloneref(game:GetService("Workspace"))
+local Players = cloneref(game:GetService("Players"))
 local LocalPlayer = Players.LocalPlayer
-local Camera = game:GetService("Workspace").CurrentCamera
-local inputService = game:GetService("UserInputService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
 
 local store = {
 	blocks = {},
@@ -21,6 +24,27 @@ local bridgeduels = {
 	EffectsController = require(ReplicatedStorage.Client.Controllers.All.EffectsController),
 	ToolService = require(ReplicatedStorage.Modules.Knit.Client).GetService("ToolService"),
 	Communication = require(ReplicatedStorage.Client.Communication)
+}
+
+local bridgeduels = {
+	Functions = {
+		GetRemote = function(name: RemoteEvent | RemoteFunction): RemoteEvent | RemoteFunction
+			local remote
+			for _, v in pairs(game:GetDescendants()) do
+				if (v:IsA('RemoteEvent') or v:IsA('RemoteFunction')) and v.Name == name then
+					remote = v
+					break
+				end
+			end
+			if name == nil then Instance.new('RemoteEvent', name) end
+			return remote
+		end
+	},
+	Remotes = {
+		AttackPlayer = bridgeduels.Functions.GetRemote("AttackPlayerWithSword"),
+		BlockSword = bridgeduels.Functions.GetRemote("ToggleBlockSword"),
+		EnterQueue = bridgeduels.Functions.GetRemote("EnterQueue")
+	}
 }
 
 local function parsePositions(part, callback)
@@ -177,6 +201,13 @@ local SwordAnimations = {
 	}
 }
 
+local function getGamemode(sub)
+	local path = replicatedStorage.Modules.ServerData.Cache
+	local jsonpath = HttpService:JSONDecode(path.Value)
+
+	return sub and jsonpath.Submode or jsonpath.Gamemode
+end
+
 return {
 	bridgeduels = bridgeduels,
 	SwordAnimations = SwordAnimations,
@@ -186,4 +217,5 @@ return {
 	getTool = getTool,
 	parsePositions = parsePositions,
 	LoopManager = LoopManager,
+	getGamemode = getGamemode
 }
