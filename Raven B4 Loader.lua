@@ -37,6 +37,10 @@ function RavenB4:CheckExecutorSupport()
         Players.LocalPlayer:Kick("Executor is not supported, please use another executor for Raven B4!")
         return false
     end
+    if string.find(identifyexecutor, 'Xeno') then
+        Players.LocalPlayer:Kick("Executor has issues loading Raven -- try another executor")
+        return false
+    end
     return true
 end
 
