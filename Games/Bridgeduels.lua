@@ -1039,7 +1039,7 @@ Nofall:CreateDropDown({ --made for later
 	end
 })
 
-local old3
+--[[local old3
 Utility:CreateToggle({
 	Name = "Cps Check Remover",
 	Callback = function(Callback)
@@ -1051,7 +1051,7 @@ Utility:CreateToggle({
 			old3 = nil
 		end
 	end
-})
+})]]
 
 Utility:CreateToggle({
 	Name = "No Jumpscare",

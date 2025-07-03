@@ -14,7 +14,7 @@ local store = {
 	serverBlocks = {}
 }
 
-local bridgeduels = {
+--[[local bridgeduels = {
 	BlinkClient = require(ReplicatedStorage.Blink.Client),
 	CombatService = require(ReplicatedStorage.Modules.Knit.Client).GetService('CombatService'),
 	CombatConstants = require(ReplicatedStorage.Constants.Melee),
@@ -24,7 +24,7 @@ local bridgeduels = {
 	EffectsController = require(ReplicatedStorage.Client.Controllers.All.EffectsController),
 	ToolService = require(ReplicatedStorage.Modules.Knit.Client).GetService("ToolService"),
 	Communication = require(ReplicatedStorage.Client.Communication)
-}
+}]]
 
 local bridgeduels = {
 	Functions = {
